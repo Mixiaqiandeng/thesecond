@@ -1,0 +1,78 @@
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+	string instr,mem,output;
+	string struction;
+	getline(cin,struction);
+	int a,b,c;
+	a=struction.find("-i");
+	b=struction.find(" ",a+3);
+	c=struction.find("-o");
+	if((a!=string::npos)&&(b!=string::npos))
+	{instr=struction.substr(a+3,b-a-3);
+	output=struction.substr(c+3,struction.length()-c-3);}  //输入指令，得到要打开的指令文档和要写的格式化文档
+	//cout<<instr<<endl;cout<<output<<endl;
+
+
+    ifstream fin(instr);
+	ofstream fout(output);
+	string order="";
+	string tmp;
+	string s;
+	while(getline(fin,tmp))
+	{
+		order=order+tmp;               //以逐行读的方式得到完整的指令(一整条字符串)
+	}
+	
+	tmp="";
+	int pos=0;
+	int pos1=order.find(";");
+	int pos2,pos3;
+	while(pos<int(order.length()))
+	{
+		if(pos1!=string::npos)
+		{   tmp=order.substr(pos,pos1-pos+1);        //就是还没有读到指令尾的时候，因为指令尾部没有分号，必须区别对待
+		    pos=pos1+1;
+			pos1=order.find(";",pos);}
+		else
+		{tmp=order.substr(pos,order.length()-pos);pos=order.length();} //截至目前得到一条还没有调整过格式的指令
+
+	    if(tmp!="")                           //其实为空的情况也不存在，先前写的没改
+		{
+			s=tmp[0];
+			while(s==" ")
+			{tmp=tmp.substr(1,tmp.length()-1);s=tmp[0];}   //去掉头部的所有空格
+			
+			pos2=tmp.find(" ");
+			pos3=tmp.find(" ",pos2+1);
+			while(pos3!=string::npos)
+			{
+				if((pos3-pos2)==1)
+				{
+					tmp=tmp.substr(0,pos2+1)+tmp.substr(pos3+1,tmp.length()-1-pos3); //这是为了去掉多余的空格
+					pos3=tmp.find(" ",pos2+1);
+				}
+				else
+				{
+					pos2=pos3;
+					pos3=tmp.find(" ",pos2+1);
+				}
+			}
+		    transform(tmp.begin(),tmp.end(),tmp.begin(),toupper);  //变为大写
+		    tmp=tmp+"\n";          //换行输入
+			//cout<<tmp;
+			fout<<tmp;             //写入到out文件中去
+		}
+	}
+	fin.clear();
+	fin.close();
+	fout.clear();
+	fout.close();
+	return 0;
+}
